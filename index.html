@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free webplugz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Add these scripts to your HTML head -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
     <style>
         :root {
             --primary-color: #405DE6;
@@ -518,330 +523,290 @@
     </footer>
     
     <script>
-        // DOM Elements
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const categories = document.querySelectorAll('.category');
-        const categoryLinks = document.querySelectorAll('.sidebar li');
-        const adminAccess = document.querySelector('.admin-access');
-        const adminAccessBtn = document.getElementById('admin-access-btn');
-        const adminModal = document.getElementById('admin-modal');
-        const adminLoginBtn = document.getElementById('admin-login-btn');
-        const adminCancelBtn = document.getElementById('admin-cancel-btn');
-        const adminPassword = document.getElementById('admin-password');
-        const currentYear = document.getElementById('current-year');
-        const secretAdminTrigger = document.getElementById('secret-admin-trigger');
-        
-        // Category containers
-        const formsContainer = document.getElementById('forms-container');
-        const methodsContainer = document.getElementById('methods-container');
-        const cbMethodsContainer = document.getElementById('cb-methods-container');
-        const otherMethodsContainer = document.getElementById('other-methods-container');
-        
-        // Admin panels
-        const formsAdmin = document.getElementById('forms-admin');
-        const methodsAdmin = document.getElementById('methods-admin');
-        const cbMethodsAdmin = document.getElementById('cb-methods-admin');
-        const otherMethodsAdmin = document.getElementById('other-methods-admin');
-        
-        // Form elements
-        const resetBtn = document.getElementById('reset-btn');
-        const igUsername = document.getElementById('ig-username');
-        const resetStatus = document.getElementById('reset-status');
-        
-        // Add buttons
-        const addFormBtn = document.getElementById('add-form-btn');
-        const addMethodBtn = document.getElementById('add-method-btn');
-        const addCbMethodBtn = document.getElementById('add-cb-method-btn');
-        const addOtherMethodBtn = document.getElementById('add-other-method-btn');
-        
-        // Sample data
-let forms = [];
-let methods = [];
-let cbMethods = [];
-let otherMethods = [];
-        
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set current year
-            currentYear.textContent = new Date().getFullYear();
-            
-            // Hide all admin panels by default
-            [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin].forEach(panel => {
-                panel.style.display = 'none';
-            });
-            
-            // Hide admin modal by default
-            adminModal.style.display = 'none';
-            
-            // Load data
-            renderForms();
-            renderMethods();
-            renderCbMethods();
-            renderOtherMethods();
-            
-            // Event listeners
-            menuToggle.addEventListener('click', toggleSidebar);
-            categoryLinks.forEach(link => {
-                link.addEventListener('click', switchCategory);
-            });
-            
-            adminLoginBtn.addEventListener('click', checkAdminPassword);
-            adminCancelBtn.addEventListener('click', hideAdminModal);
-            
-            resetBtn.addEventListener('click', sendResetLink);
-            
-            addFormBtn.addEventListener('click', addNewForm);
-            addMethodBtn.addEventListener('click', addNewMethod);
-            addCbMethodBtn.addEventListener('click', addNewCbMethod);
-            addOtherMethodBtn.addEventListener('click', addNewOtherMethod);
-            
-            // Secret admin trigger (hidden in bottom-right corner)
-            secretAdminTrigger.addEventListener('click', function() {
-                adminAccess.classList.add('show');
-                setTimeout(() => {
-                    adminAccess.classList.remove('show');
-                }, 3000);
-            });
-            
-            adminAccessBtn.addEventListener('click', showAdminModal);
-            
-            // Enter key support for admin password
-            adminPassword.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    checkAdminPassword();
-                }
-            });
-        });
-        
-        // Toggle sidebar
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-        }
-        
-        // Switch between categories
-        function switchCategory(e) {
-            const categoryId = this.getAttribute('data-category');
-            
-            // Update active link
-            categoryLinks.forEach(link => {
-                link.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            // Show selected category
-            categories.forEach(category => {
-                category.classList.remove('active');
-            });
-            document.getElementById(categoryId).classList.add('active');
-            
-            // Close sidebar on mobile
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('open');
-            }
-        }
-        
-        // Admin functions
-        function showAdminModal() {
-            adminModal.style.display = 'flex';
-            adminPassword.focus();
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function hideAdminModal() {
-            adminModal.style.display = 'none';
-            adminPassword.value = '';
-            document.body.style.overflow = '';
-        }
-        
-        function checkAdminPassword() {
-            const password = adminPassword.value.trim();
-            
-            if (!password) {
-                alert('Please enter a password');
-                return;
-            }
-            
-            if (password === 'KING12FF') {
-                // Show all admin panels
-                [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin].forEach(panel => {
-                    panel.style.display = 'block';
-                });
-                
-                hideAdminModal();
-            } else {
-                alert('Incorrect password!');
-                adminPassword.value = '';
-                adminPassword.focus();
-            }
-        }
-        
-        // Instagram reset function (real API call)
-        function sendResetLink() {
-    // Create a popup element
-    const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.backgroundColor = '#333';
-    popup.style.color = 'white';
-    popup.style.padding = '20px';
-    popup.style.borderRadius = '8px';
-    popup.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
-    popup.style.zIndex = '1000';
-    popup.style.textAlign = 'center';
-    
-    // Add popup content
-    popup.innerHTML = `
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCSosfNm7gvlCEtxF1cTVofyWv5v2GKe8",
+      authDomain: "freewebplugz.firebaseapp.com",
+      databaseURL: "https://freewebplugz-default-rtdb.firebaseio.com",
+      projectId: "freewebplugz",
+      storageBucket: "freewebplugz.firebasestorage.app",
+      messagingSenderId: "624835077830",
+      appId: "1:624835077830:web:691beaefcb4987d18e19c7",
+      measurementId: "G-GBWB672DF4"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    // Data variables
+    let forms = [];
+    let methods = [];
+    let cbMethods = [];
+    let otherMethods = [];
+    let isAdmin = false;
+
+    // DOM elements
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const categoryLinks = document.querySelectorAll('.sidebar li');
+    const categories = document.querySelectorAll('.category');
+    const currentYear = document.getElementById('current-year');
+    const secretAdminTrigger = document.getElementById('secret-admin-trigger');
+    const adminAccess = document.querySelector('.admin-access');
+    const adminAccessBtn = document.getElementById('admin-access-btn');
+    const adminModal = document.getElementById('admin-modal');
+    const adminPassword = document.getElementById('admin-password');
+    const adminLoginBtn = document.getElementById('admin-login-btn');
+    const adminCancelBtn = document.getElementById('admin-cancel-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const addFormBtn = document.getElementById('add-form-btn');
+    const addMethodBtn = document.getElementById('add-method-btn');
+    const addCbMethodBtn = document.getElementById('add-cb-method-btn');
+    const addOtherMethodBtn = document.getElementById('add-other-method-btn');
+    const formsContainer = document.getElementById('forms-container');
+    const methodsContainer = document.getElementById('methods-container');
+    const cbMethodsContainer = document.getElementById('cb-methods-container');
+    const otherMethodsContainer = document.getElementById('other-methods-container');
+    const formsAdmin = document.getElementById('forms-admin');
+    const methodsAdmin = document.getElementById('methods-admin');
+    const cbMethodsAdmin = document.getElementById('cb-methods-admin');
+    const otherMethodsAdmin = document.getElementById('other-methods-admin');
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize data loading
+      loadData();
+      
+      // Set current year
+      currentYear.textContent = new Date().getFullYear();
+      
+      // Initialize UI elements
+      menuToggle.addEventListener('click', toggleSidebar);
+      categoryLinks.forEach(link => {
+        link.addEventListener('click', switchCategory);
+      });
+      
+      // Admin functionality
+      secretAdminTrigger.addEventListener('click', showAdminButton);
+      adminAccessBtn.addEventListener('click', showAdminModal);
+      adminLoginBtn.addEventListener('click', checkAdminPassword);
+      adminCancelBtn.addEventListener('click', hideAdminModal);
+      adminPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkAdminPassword();
+      });
+      
+      // Form buttons
+      resetBtn.addEventListener('click', sendResetLink);
+      addFormBtn.addEventListener('click', () => addNewItem('form'));
+      addMethodBtn.addEventListener('click', () => addNewItem('method'));
+      addCbMethodBtn.addEventListener('click', () => addNewItem('cbMethod'));
+      addOtherMethodBtn.addEventListener('click', () => addNewItem('otherMethod'));
+    });
+
+    // ===== DATA FUNCTIONS ===== //
+
+    function loadData() {
+      database.ref('siteData').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        forms = data.forms || [];
+        methods = data.methods || [];
+        cbMethods = data.cbMethods || [];
+        otherMethods = data.otherMethods || [];
+        renderAll();
+      });
+    }
+
+    function saveAll() {
+      if (!isAdmin) {
+        alert("Admin privileges required!");
+        return;
+      }
+      
+      database.ref('siteData').set({
+        forms,
+        methods,
+        cbMethods,
+        otherMethods
+      }).catch(error => {
+        console.error("Save error:", error);
+        alert("Error saving data");
+      });
+    }
+
+    // ===== UI FUNCTIONS ===== //
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
+
+    function switchCategory() {
+      const categoryId = this.getAttribute('data-category');
+      categoryLinks.forEach(link => link.classList.remove('active'));
+      this.classList.add('active');
+      categories.forEach(cat => cat.classList.remove('active'));
+      document.getElementById(categoryId).classList.add('active');
+      
+      if (window.innerWidth < 768) {
+        sidebar.classList.remove('open');
+      }
+    }
+
+    function showAdminButton() {
+      adminAccess.classList.add('show');
+      setTimeout(() => adminAccess.classList.remove('show'), 3000);
+    }
+
+    function showAdminModal() {
+      adminModal.style.display = 'flex';
+      adminPassword.focus();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideAdminModal() {
+      adminModal.style.display = 'none';
+      adminPassword.value = '';
+      document.body.style.overflow = '';
+    }
+
+    function checkAdminPassword() {
+      const password = adminPassword.value.trim();
+      
+      if (password === 'KING12FF') {
+        auth.signInAnonymously()
+          .then(() => {
+            isAdmin = true;
+            [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin]
+              .forEach(panel => panel.style.display = 'block');
+            hideAdminModal();
+            alert("Admin access granted!");
+          })
+          .catch(error => {
+            console.error("Auth error:", error);
+            alert("Login failed. Check console.");
+          });
+      } else {
+        alert('Incorrect password!');
+        adminPassword.value = '';
+        adminPassword.focus();
+      }
+    }
+
+    // ===== CORE FUNCTIONALITY ===== //
+
+    function addNewItem(type) {
+      if (!isAdmin) {
+        alert("Admin access required!");
+        return;
+      }
+
+      const prefixMap = {
+        'form': 'form',
+        'method': 'method',
+        'cbMethod': 'cb-method',
+        'otherMethod': 'other-method'
+      };
+      
+      const prefix = prefixMap[type];
+      const name = document.getElementById(`${prefix}-name`).value.trim();
+      const desc = document.getElementById(`${prefix}-desc`).value.trim();
+      const link = type === 'form' ? document.getElementById(`${prefix}-link`).value.trim() : null;
+
+      if (!name || !desc || (type === 'form' && !link)) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const newItem = type === 'form' ? 
+        { name, description: desc, link } : 
+        { name, description: desc };
+
+      if (type === 'form') forms.push(newItem);
+      else if (type === 'method') methods.push(newItem);
+      else if (type === 'cbMethod') cbMethods.push(newItem);
+      else otherMethods.push(newItem);
+
+      saveAll();
+      renderAll();
+      
+      // Clear form
+      document.getElementById(`${prefix}-name`).value = '';
+      document.getElementById(`${prefix}-desc`).value = '';
+      if (type === 'form') document.getElementById(`${prefix}-link`).value = '';
+    }
+
+    function renderAll() {
+      renderForms();
+      renderMethods();
+      renderCbMethods();
+      renderOtherMethods();
+    }
+
+    function renderForms() {
+      formsContainer.innerHTML = forms.map(form => `
+        <div class="method-card">
+          <h3>${form.name}</h3>
+          <p>${form.description}</p>
+          <a href="${form.link}" target="_blank" class="social-btn" style="display: inline-block; margin-top: 10px;">
+            Open Form
+          </a>
+        </div>
+      `).join('');
+    }
+
+    function renderMethods() {
+      methodsContainer.innerHTML = methods.map(method => `
+        <div class="method-card">
+          <h3>${method.name}</h3>
+          <p>${method.description}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderCbMethods() {
+      cbMethodsContainer.innerHTML = cbMethods.map(method => `
+        <div class="method-card">
+          <h3>${method.name}</h3>
+          <p>${method.description}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderOtherMethods() {
+      otherMethodsContainer.innerHTML = otherMethods.map(method => `
+        <div class="method-card">
+          <h3>${method.name}</h3>
+          <p>${method.description}</p>
+        </div>
+      `).join('');
+    }
+
+    function sendResetLink() {
+      const popup = document.createElement('div');
+      popup.style.position = 'fixed';
+      popup.style.top = '50%';
+      popup.style.left = '50%';
+      popup.style.transform = 'translate(-50%, -50%)';
+      popup.style.backgroundColor = '#333';
+      popup.style.color = 'white';
+      popup.style.padding = '20px';
+      popup.style.borderRadius = '8px';
+      popup.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+      popup.style.zIndex = '1000';
+      popup.style.textAlign = 'center';
+      popup.innerHTML = `
         <p>This feature will be coming soon!</p>
         <button style="margin-top: 10px; padding: 5px 15px; cursor: pointer;">
-            OK
+          OK
         </button>
-    `;
-    
-    // Add to document
-    document.body.appendChild(popup);
-    
-    // Add click handler for the OK button
-    const okButton = popup.querySelector('button');
-    okButton.addEventListener('click', function() {
+      `;
+      document.body.appendChild(popup);
+      
+      popup.querySelector('button').addEventListener('click', () => {
         document.body.removeChild(popup);
-    });
-    
-    // Optional: Close when clicking outside
-    popup.addEventListener('click', function(e) {
-        if (e.target === popup) {
-            document.body.removeChild(popup);
-        }
-    });
-}
-        // Render functions
-        function renderForms() {
-            formsContainer.innerHTML = '';
-            forms.forEach(form => {
-                const formCard = document.createElement('div');
-                formCard.className = 'method-card';
-                formCard.innerHTML = `
-                    <h3>${form.name}</h3>
-                    <p>${form.description}</p>
-                    <a href="${form.link}" target="_blank" class="social-btn" style="display: inline-block; margin-top: 10px;">
-                        Open Form
-                    </a>
-                `;
-                formsContainer.appendChild(formCard);
-            });
-        }
-        
-        function renderMethods() {
-            methodsContainer.innerHTML = '';
-            methods.forEach(method => {
-                const methodCard = document.createElement('div');
-                methodCard.className = 'method-card';
-                methodCard.innerHTML = `
-                    <h3>${method.name}</h3>
-                    <p>${method.description}</p>
-                `;
-                methodsContainer.appendChild(methodCard);
-            });
-        }
-        
-        function renderCbMethods() {
-            cbMethodsContainer.innerHTML = '';
-            cbMethods.forEach(method => {
-                const methodCard = document.createElement('div');
-                methodCard.className = 'method-card';
-                methodCard.innerHTML = `
-                    <h3>${method.name}</h3>
-                    <p>${method.description}</p>
-                `;
-                cbMethodsContainer.appendChild(methodCard);
-            });
-        }
-        
-        function renderOtherMethods() {
-            otherMethodsContainer.innerHTML = '';
-            otherMethods.forEach(method => {
-                const methodCard = document.createElement('div');
-                methodCard.className = 'method-card';
-                methodCard.innerHTML = `
-                    <h3>${method.name}</h3>
-                    <p>${method.description}</p>
-                `;
-                otherMethodsContainer.appendChild(methodCard);
-            });
-        }
-        
-        // Add new items
-        function addNewForm() {
-            const name = document.getElementById('form-name').value.trim();
-            const desc = document.getElementById('form-desc').value.trim();
-            const link = document.getElementById('form-link').value.trim();
-            
-            if (!name || !desc || !link) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            forms.push({ name, description: desc, link });
-            renderForms();
-            
-            // Clear form
-            document.getElementById('form-name').value = '';
-            document.getElementById('form-desc').value = '';
-            document.getElementById('form-link').value = '';
-        }
-        
-        function addNewMethod() {
-            const name = document.getElementById('method-name').value.trim();
-            const desc = document.getElementById('method-desc').value.trim();
-            
-            if (!name || !desc) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            methods.push({ name, description: desc });
-            renderMethods();
-            
-            // Clear form
-            document.getElementById('method-name').value = '';
-            document.getElementById('method-desc').value = '';
-        }
-        
-        function addNewCbMethod() {
-            const name = document.getElementById('cb-method-name').value.trim();
-            const desc = document.getElementById('cb-method-desc').value.trim();
-            
-            if (!name || !desc) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            cbMethods.push({ name, description: desc });
-            renderCbMethods();
-            
-            // Clear form
-            document.getElementById('cb-method-name').value = '';
-            document.getElementById('cb-method-desc').value = '';
-        }
-        
-        function addNewOtherMethod() {
-            const name = document.getElementById('other-method-name').value.trim();
-            const desc = document.getElementById('other-method-desc').value.trim();
-            
-            if (!name || !desc) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            otherMethods.push({ name, description: desc });
-            renderOtherMethods();
-            
-            // Clear form
-            document.getElementById('other-method-name').value = '';
-            document.getElementById('other-method-desc').value = '';
-        }
+      });
+    }
     </script>
 </body>
 </html>
