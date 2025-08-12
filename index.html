@@ -619,21 +619,33 @@
     }
 
     function saveAll() {
-      if (!isAdmin) {
-        alert("Admin privileges required!");
-        return;
-      }
-      
-      database.ref('siteData').set({
-        forms,
-        methods,
-        cbMethods,
-        otherMethods
-      }).catch(error => {
-        console.error("Save error:", error);
-        alert("Error saving data");
-      });
-    }
+  if (!isAdmin) {
+    alert("Admin privileges required!");
+    return;
+  }
+
+  // Merge instead of overwrite
+  database.ref('siteData').once('value').then(snapshot => {
+    const existingData = snapshot.val() || {};
+
+    const updatedData = {
+      ...existingData, // keep old data
+      forms,
+      methods,
+      cbMethods,
+      otherMethods
+    };
+
+    return database.ref('siteData').update(updatedData);
+  })
+  .then(() => {
+    alert("Data saved successfully!");
+  })
+  .catch(error => {
+    console.error("Save error:", error);
+    alert("Error saving data: " + error.message);
+  });
+}
 
     // ===== UI FUNCTIONS ===== //
 
@@ -803,4 +815,3 @@
     </script>
 </body>
 </html>
-
