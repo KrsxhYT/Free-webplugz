@@ -671,27 +671,20 @@
     }
 
     function checkAdminPassword() {
-      const password = adminPassword.value.trim();
-      
-      if (password === 'KING12FF') {
-        auth.signInAnonymously()
-          .then(() => {
-            isAdmin = true;
-            [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin]
-              .forEach(panel => panel.style.display = 'block');
-            hideAdminModal();
-            alert("Admin access granted!");
-          })
-          .catch(error => {
-            console.error("Auth error:", error);
-            alert("Login failed. Check console.");
-          });
-      } else {
-        alert('Incorrect password!');
-        adminPassword.value = '';
-        adminPassword.focus();
-      }
-    }
+  const password = adminPassword.value.trim();
+  
+  if (password === 'KING12FF') {
+    isAdmin = true;
+    [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin]
+      .forEach(panel => panel.style.display = 'block');
+    hideAdminModal();
+    alert("Admin access granted!");
+  } else {
+    alert('Incorrect password!');
+    adminPassword.value = '';
+    adminPassword.focus();
+  }
+}
 
     // ===== CORE FUNCTIONALITY ===== //
 
@@ -810,3 +803,4 @@
     </script>
 </body>
 </html>
+
