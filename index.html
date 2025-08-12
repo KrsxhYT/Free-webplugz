@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free webplugz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #405DE6;
+            --secondary-color: #5851DB;
+            --accent-color: #833AB4;
+            --text-color: #e0e0e0;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --light-gray: #2d2d2d;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+        
+        .menu-toggle {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background: var(--card-bg);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .sidebar li {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sidebar li:hover {
+            background: var(--light-gray);
+        }
+        
+        .sidebar li.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .category {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+        
+        .category.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            background: var(--light-gray);
+            color: var(--text-color);
+        }
+        
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .social-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        
+        .social-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .telegram {
+            background: #0088cc;
+        }
+        
+        .youtube {
+            background: #ff0000;
+        }
+        
+        .admin-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--light-gray);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .method-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .method-card h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .admin-access {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .admin-access.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .admin-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+        
+        .admin-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .secret-admin-trigger {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background: transparent;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        #admin-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        #admin-modal .card {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <h1>Free webplugz</h1>
+    </header>
+    
+    <div class="sidebar">
+        <ul>
+            <li class="active" data-category="igreset"><i class="fab fa-instagram"></i> IG Reset</li>
+            <li data-category="forms"><i class="fas fa-list-alt"></i> Forms</li>
+            <li data-category="methods"><i class="fas fa-code"></i> Methods</li>
+            <li data-category="cb-methods"><i class="fas fa-shield-alt"></i> CB Methods</li>
+            <li data-category="other-methods"><i class="fas fa-globe"></i> Other Countries Methods</li>
+            <li data-category="personal-info"><i class="fas fa-user"></i> Personal Information</li>
+            <li data-category="about"><i class="fas fa-info-circle"></i> About</li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <!-- IG Reset Category -->
+        <div id="igreset" class="category active">
+            <div class="card">
+                <h2>Instagram Password Reset</h2>
+                <p>Enter your Instagram username or email to receive a password reset link.</p>
+                
+                <div class="form-group">
+                    <label for="ig-username">Username or Email</label>
+                    <input type="text" id="ig-username" placeholder="Enter username or email">
+                </div>
+                
+                <button id="reset-btn">Send Reset Link</button>
+                <div id="reset-status" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+        
+        <!-- Forms Category -->
+        <div id="forms" class="category">
+            <div class="card">
+                <h2>Forms</h2>
+                <p>List of available forms with links.</p>
+                
+                <div class="cards-container" id="forms-container">
+                    <!-- Forms will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="forms-admin">
+                    <h3>Admin Panel - Add New Form</h3>
+                    <div class="form-group">
+                        <label for="form-name">Form Name</label>
+                        <input type="text" id="form-name" placeholder="Enter form name">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-desc">Description</label>
+                        <textarea id="form-desc" placeholder="Enter form description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-link">Link</label>
+                        <input type="text" id="form-link" placeholder="Enter form link">
+                    </div>
+                    <button id="add-form-btn">Add Form</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Methods Category -->
+        <div id="methods" class="category">
+            <div class="card">
+                <h2>Methods</h2>
+                <p>List of available methods.</p>
+                
+                <div class="cards-container" id="methods-container">
+                    <!-- Methods will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="methods-admin">
+                    <h3>Admin Panel - Add New Method</h3>
+                    <div class="form-group">
+                        <label for="method-name">Method Name</label>
+                        <input type="text" id="method-name" placeholder="Enter method name">
+                    </div>
+                    <div class="form-group">
+                        <label for="method-desc">Method Description</label>
+                        <textarea id="method-desc" placeholder="Enter method description"></textarea>
+                    </div>
+                    <button id="add-method-btn">Add Method</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CB Methods Category -->
+        <div id="cb-methods" class="category">
+            <div class="card">
+                <h2>CB Methods</h2>
+                <p>List of available CB methods.</p>
+                
+                <div class="cards-container" id="cb-methods-container">
+                    <!-- CB Methods will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="cb-methods-admin">
+                    <h3>Admin Panel - Add New CB Method</h3>
+                    <div class="form-group">
+                        <label for="cb-method-name">Method Name</label>
+                        <input type="text" id="cb-method-name" placeholder="Enter CB method name">
+                    </div>
+                    <div class="form-group">
+                        <label for="cb-method-desc">Method Description</label>
+                        <textarea id="cb-method-desc" placeholder="Enter CB method description"></textarea>
+                    </div>
+                    <button id="add-cb-method-btn">Add CB Method</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Other Countries Methods Category -->
+        <div id="other-methods" class="category">
+            <div class="card">
+                <h2>Other Countries Methods</h2>
+                <p>List of methods for other countries.</p>
+                
+                <div class="cards-container" id="other-methods-container">
+                    <!-- Other countries methods will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="other-methods-admin">
+                    <h3>Admin Panel - Add New Method</h3>
+                    <div class="form-group">
+                        <label for="other-method-name">Method Name</label>
+                        <input type="text" id="other-method-name" placeholder="Enter method name">
+                    </div>
+                    <div class="form-group">
+                        <label for="other-method-desc">Method Description</label>
+                        <textarea id="other-method-desc" placeholder="Enter method description"></textarea>
+                    </div>
+                    <button id="add-other-method-btn">Add Method</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Personal Information Category -->
+        <div id="personal-info" class="category">
+            <div class="card">
+                <h2>Personal Information</h2>
+                
+                <div class="social-buttons">
+                    <a href="https://t.me/adminusername" class="social-btn telegram">
+                        <i class="fab fa-telegram"></i> Admin
+                    </a>
+                    <a href="https://t.me/adminchannel" class="social-btn telegram">
+                        <i class="fab fa-telegram"></i> Admin Channel
+                    </a>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <p>This is a Free webplugz designed to provide various services and information. You can navigate through different categories using the menu.</p>
+                    <p>For any inquiries or support, please contact the admin through Telegram.</p>
+                </div>
+                
+                <div class="social-buttons" style="justify-content: center; margin-top: 30px;">
+                    <a href="#" class="social-btn telegram">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                    <a href="#" class="social-btn telegram">
+                        <i class="fab fa-telegram"></i> Channel
+                    </a>
+                    <a href="#" class="social-btn youtube">
+                        <i class="fab fa-youtube"></i> YouTube
+                    </a>
+                    <a href="#" class="social-btn youtube">
+                        <i class="fab fa-youtube"></i> Tutorials
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- About Category -->
+        <div id="about" class="category">
+            <div class="card">
+                <h2>About This Web Application</h2>
+                <p>This is a multi-purpose web application designed to provide various services across different categories including Instagram password reset, forms, methods, and more.</p>
+                
+                <h3 style="margin-top: 20px;">Features:</h3>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Instagram password reset functionality</li>
+                    <li>Dynamic forms with admin control</li>
+                    <li>Methods and CB methods listings</li>
+                    <li>Other countries methods section</li>
+                    <li>Contact information and social links</li>
+                    <li>Admin panel for content management</li>
+                </ul>
+                
+                <h3 style="margin-top: 20px;">How to Use:</h3>
+                <p>Navigate through different categories using the menu on the left side.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-access">
+        <button class="admin-btn" id="admin-access-btn">
+            <i class="fas fa-lock"></i>
+        </button>
+    </div>
+    
+    <!-- Hidden secret trigger for admin access -->
+    <div class="secret-admin-trigger" id="secret-admin-trigger"></div>
+    
+    <!-- Admin Password Modal -->
+    <div id="admin-modal">
+        <div class="card">
+            <h2>Admin Access</h2>
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+            </div>
+            <button id="admin-login-btn">Login</button>
+            <button class="btn-secondary" id="admin-cancel-btn" style="margin-left: 10px;">Cancel</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; <span id="current-year"></span> Free webplugz. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        // DOM Elements
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const categories = document.querySelectorAll('.category');
+        const categoryLinks = document.querySelectorAll('.sidebar li');
+        const adminAccess = document.querySelector('.admin-access');
+        const adminAccessBtn = document.getElementById('admin-access-btn');
+        const adminModal = document.getElementById('admin-modal');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const adminCancelBtn = document.getElementById('admin-cancel-btn');
+        const adminPassword = document.getElementById('admin-password');
+        const currentYear = document.getElementById('current-year');
+        const secretAdminTrigger = document.getElementById('secret-admin-trigger');
+        
+        // Category containers
+        const formsContainer = document.getElementById('forms-container');
+        const methodsContainer = document.getElementById('methods-container');
+        const cbMethodsContainer = document.getElementById('cb-methods-container');
+        const otherMethodsContainer = document.getElementById('other-methods-container');
+        
+        // Admin panels
+        const formsAdmin = document.getElementById('forms-admin');
+        const methodsAdmin = document.getElementById('methods-admin');
+        const cbMethodsAdmin = document.getElementById('cb-methods-admin');
+        const otherMethodsAdmin = document.getElementById('other-methods-admin');
+        
+        // Form elements
+        const resetBtn = document.getElementById('reset-btn');
+        const igUsername = document.getElementById('ig-username');
+        const resetStatus = document.getElementById('reset-status');
+        
+        // Add buttons
+        const addFormBtn = document.getElementById('add-form-btn');
+        const addMethodBtn = document.getElementById('add-method-btn');
+        const addCbMethodBtn = document.getElementById('add-cb-method-btn');
+        const addOtherMethodBtn = document.getElementById('add-other-method-btn');
+        
+        // Sample data
+let forms = [];
+let methods = [];
+let cbMethods = [];
+let otherMethods = [];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current year
+            currentYear.textContent = new Date().getFullYear();
+            
+            // Hide all admin panels by default
+            [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin].forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            // Hide admin modal by default
+            adminModal.style.display = 'none';
+            
+            // Load data
+            renderForms();
+            renderMethods();
+            renderCbMethods();
+            renderOtherMethods();
+            
+            // Event listeners
+            menuToggle.addEventListener('click', toggleSidebar);
+            categoryLinks.forEach(link => {
+                link.addEventListener('click', switchCategory);
+            });
+            
+            adminLoginBtn.addEventListener('click', checkAdminPassword);
+            adminCancelBtn.addEventListener('click', hideAdminModal);
+            
+            resetBtn.addEventListener('click', sendResetLink);
+            
+            addFormBtn.addEventListener('click', addNewForm);
+            addMethodBtn.addEventListener('click', addNewMethod);
+            addCbMethodBtn.addEventListener('click', addNewCbMethod);
+            addOtherMethodBtn.addEventListener('click', addNewOtherMethod);
+            
+            // Secret admin trigger (hidden in bottom-right corner)
+            secretAdminTrigger.addEventListener('click', function() {
+                adminAccess.classList.add('show');
+                setTimeout(() => {
+                    adminAccess.classList.remove('show');
+                }, 3000);
+            });
+            
+            adminAccessBtn.addEventListener('click', showAdminModal);
+            
+            // Enter key support for admin password
+            adminPassword.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAdminPassword();
+                }
+            });
+        });
+        
+        // Toggle sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+        }
+        
+        // Switch between categories
+        function switchCategory(e) {
+            const categoryId = this.getAttribute('data-category');
+            
+            // Update active link
+            categoryLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Show selected category
+            categories.forEach(category => {
+                category.classList.remove('active');
+            });
+            document.getElementById(categoryId).classList.add('active');
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('open');
+            }
+        }
+        
+        // Admin functions
+        function showAdminModal() {
+            adminModal.style.display = 'flex';
+            adminPassword.focus();
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideAdminModal() {
+            adminModal.style.display = 'none';
+            adminPassword.value = '';
+            document.body.style.overflow = '';
+        }
+        
+        function checkAdminPassword() {
+            const password = adminPassword.value.trim();
+            
+            if (!password) {
+                alert('Please enter a password');
+                return;
+            }
+            
+            if (password === 'KING12FF') {
+                // Show all admin panels
+                [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin].forEach(panel => {
+                    panel.style.display = 'block';
+                });
+                
+                hideAdminModal();
+            } else {
+                alert('Incorrect password!');
+                adminPassword.value = '';
+                adminPassword.focus();
+            }
+        }
+        
+        // Instagram reset function (real API call)
+        function sendResetLink() {
+    // Create a popup element
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.backgroundColor = '#333';
+    popup.style.color = 'white';
+    popup.style.padding = '20px';
+    popup.style.borderRadius = '8px';
+    popup.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+    popup.style.zIndex = '1000';
+    popup.style.textAlign = 'center';
+    
+    // Add popup content
+    popup.innerHTML = `
+        <p>This feature will be coming soon!</p>
+        <button style="margin-top: 10px; padding: 5px 15px; cursor: pointer;">
+            OK
+        </button>
+    `;
+    
+    // Add to document
+    document.body.appendChild(popup);
+    
+    // Add click handler for the OK button
+    const okButton = popup.querySelector('button');
+    okButton.addEventListener('click', function() {
+        document.body.removeChild(popup);
+    });
+    
+    // Optional: Close when clicking outside
+    popup.addEventListener('click', function(e) {
+        if (e.target === popup) {
+            document.body.removeChild(popup);
+        }
+    });
+}
+        // Render functions
+        function renderForms() {
+            formsContainer.innerHTML = '';
+            forms.forEach(form => {
+                const formCard = document.createElement('div');
+                formCard.className = 'method-card';
+                formCard.innerHTML = `
+                    <h3>${form.name}</h3>
+                    <p>${form.description}</p>
+                    <a href="${form.link}" target="_blank" class="social-btn" style="display: inline-block; margin-top: 10px;">
+                        Open Form
+                    </a>
+                `;
+                formsContainer.appendChild(formCard);
+            });
+        }
+        
+        function renderMethods() {
+            methodsContainer.innerHTML = '';
+            methods.forEach(method => {
+                const methodCard = document.createElement('div');
+                methodCard.className = 'method-card';
+                methodCard.innerHTML = `
+                    <h3>${method.name}</h3>
+                    <p>${method.description}</p>
+                `;
+                methodsContainer.appendChild(methodCard);
+            });
+        }
+        
+        function renderCbMethods() {
+            cbMethodsContainer.innerHTML = '';
+            cbMethods.forEach(method => {
+                const methodCard = document.createElement('div');
+                methodCard.className = 'method-card';
+                methodCard.innerHTML = `
+                    <h3>${method.name}</h3>
+                    <p>${method.description}</p>
+                `;
+                cbMethodsContainer.appendChild(methodCard);
+            });
+        }
+        
+        function renderOtherMethods() {
+            otherMethodsContainer.innerHTML = '';
+            otherMethods.forEach(method => {
+                const methodCard = document.createElement('div');
+                methodCard.className = 'method-card';
+                methodCard.innerHTML = `
+                    <h3>${method.name}</h3>
+                    <p>${method.description}</p>
+                `;
+                otherMethodsContainer.appendChild(methodCard);
+            });
+        }
+        
+        // Add new items
+        function addNewForm() {
+            const name = document.getElementById('form-name').value.trim();
+            const desc = document.getElementById('form-desc').value.trim();
+            const link = document.getElementById('form-link').value.trim();
+            
+            if (!name || !desc || !link) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            forms.push({ name, description: desc, link });
+            renderForms();
+            
+            // Clear form
+            document.getElementById('form-name').value = '';
+            document.getElementById('form-desc').value = '';
+            document.getElementById('form-link').value = '';
+        }
+        
+        function addNewMethod() {
+            const name = document.getElementById('method-name').value.trim();
+            const desc = document.getElementById('method-desc').value.trim();
+            
+            if (!name || !desc) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            methods.push({ name, description: desc });
+            renderMethods();
+            
+            // Clear form
+            document.getElementById('method-name').value = '';
+            document.getElementById('method-desc').value = '';
+        }
+        
+        function addNewCbMethod() {
+            const name = document.getElementById('cb-method-name').value.trim();
+            const desc = document.getElementById('cb-method-desc').value.trim();
+            
+            if (!name || !desc) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            cbMethods.push({ name, description: desc });
+            renderCbMethods();
+            
+            // Clear form
+            document.getElementById('cb-method-name').value = '';
+            document.getElementById('cb-method-desc').value = '';
+        }
+        
+        function addNewOtherMethod() {
+            const name = document.getElementById('other-method-name').value.trim();
+            const desc = document.getElementById('other-method-desc').value.trim();
+            
+            if (!name || !desc) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            otherMethods.push({ name, description: desc });
+            renderOtherMethods();
+            
+            // Clear form
+            document.getElementById('other-method-name').value = '';
+            document.getElementById('other-method-desc').value = '';
+        }
+    </script>
+</body>
+</html>
