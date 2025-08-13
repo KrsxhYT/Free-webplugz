@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
     <style>
         :root {
@@ -357,6 +358,8 @@
             <li data-category="xml"><i class="fas fa-file-code"></i> XML</li>
             <li data-category="pfp"><i class="fas fa-image"></i> Pfp</li>
             <li data-category="video-tutorials"><i class="fas fa-video"></i> Video Tutorials</li>
+            <li data-category="books"><i class="fas fa-book"></i> Books</li>
+            <li data-category="apks"><i class="fab fa-android"></i> APKs</li>
             <li data-category="personal-info"><i class="fas fa-user"></i> Personal Information</li>
             <li data-category="about"><i class="fas fa-info-circle"></i> About</li>
         </ul>
@@ -573,13 +576,70 @@
                 </div>
             </div>
         </div>
+
+        <!-- Books Category -->
+        <div id="books" class="category">
+            <div class="card">
+                <h2>Books</h2>
+                <p>Collection of books (downloadable files).</p>
+                
+                <div class="cards-container" id="books-container">
+                    <!-- Books will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="books-admin">
+                    <h3>Admin Panel - Add New Book</h3>
+                    <div class="form-group">
+                        <label for="books-name">Name</label>
+                        <input type="text" id="books-name" placeholder="Enter book name">
+                    </div>
+                    <div class="form-group">
+                        <label for="books-desc">Description</label>
+                        <textarea id="books-desc" placeholder="Enter book description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="books-file-input">Choose File (from phone)</label>
+                        <input type="file" id="books-file-input" accept="*/*">
+                    </div>
+                    <button id="add-book-btn">Add Book</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- APKs Category -->
+        <div id="apks" class="category">
+            <div class="card">
+                <h2>APKs</h2>
+                <p>Collection of APK files (downloadable).</p>
+                
+                <div class="cards-container" id="apks-container">
+                    <!-- APKs will be added here dynamically -->
+                </div>
+                
+                <div class="admin-panel" id="apks-admin">
+                    <h3>Admin Panel - Add New APK</h3>
+                    <div class="form-group">
+                        <label for="apks-name">Name</label>
+                        <input type="text" id="apks-name" placeholder="Enter apk name">
+                    </div>
+                    <div class="form-group">
+                        <label for="apks-desc">Description</label>
+                        <textarea id="apks-desc" placeholder="Enter apk description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="apks-file-input">Choose File (from phone)</label>
+                        <input type="file" id="apks-file-input" accept=".apk,application/vnd.android.package-archive,*/*">
+                    </div>
+                    <button id="add-apk-btn">Add APK</button>
+                </div>
+            </div>
+        </div>
         
         <!-- Personal Information Category -->
         <div id="personal-info" class="category">
             <div class="card">
                 <h2>Personal Information</h2>
-                
-                <div class="social-buttons">
+               <div class="social-buttons">
                     <a href="https://t.me/adminusername" class="social-btn telegram">
                         <i class="fab fa-telegram"></i> Admin
                     </a>
@@ -678,6 +738,7 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const auth = firebase.auth();
+    const storage = firebase.storage();
 
     // Data variables
     let forms = [];
@@ -687,6 +748,8 @@
     let xmlFiles = [];
     let pfps = [];
     let videoTutorials = [];
+    let books = [];
+    let apks = [];
     let isAdmin = false;
 
     // DOM elements
@@ -710,6 +773,9 @@
     const addXmlBtn = document.getElementById('add-xml-btn');
     const addPfpBtn = document.getElementById('add-pfp-btn');
     const addVideoBtn = document.getElementById('add-video-btn');
+    const addBookBtn = document.getElementById('add-book-btn');
+    const addApkBtn = document.getElementById('add-apk-btn');
+
     const formsContainer = document.getElementById('forms-container');
     const methodsContainer = document.getElementById('methods-container');
     const cbMethodsContainer = document.getElementById('cb-methods-container');
@@ -717,6 +783,9 @@
     const xmlContainer = document.getElementById('xml-container');
     const pfpContainer = document.getElementById('pfp-container');
     const videoTutorialsContainer = document.getElementById('video-tutorials-container');
+    const booksContainer = document.getElementById('books-container');
+    const apksContainer = document.getElementById('apks-container');
+
     const formsAdmin = document.getElementById('forms-admin');
     const methodsAdmin = document.getElementById('methods-admin');
     const cbMethodsAdmin = document.getElementById('cb-methods-admin');
@@ -724,6 +793,8 @@
     const xmlAdmin = document.getElementById('xml-admin');
     const pfpAdmin = document.getElementById('pfp-admin');
     const videoTutorialsAdmin = document.getElementById('video-tutorials-admin');
+    const booksAdmin = document.getElementById('books-admin');
+    const apksAdmin = document.getElementById('apks-admin');
 
     // Initialize the app
     document.addEventListener('DOMContentLoaded', function() {
@@ -757,6 +828,8 @@
       addXmlBtn.addEventListener('click', () => addNewItem('xml'));
       addPfpBtn.addEventListener('click', () => addNewItem('pfp'));
       addVideoBtn.addEventListener('click', () => addNewItem('videoTutorial'));
+      addBookBtn.addEventListener('click', () => addNewItem('book'));
+      addApkBtn.addEventListener('click', () => addNewItem('apk'));
     });
 
     // ===== DATA FUNCTIONS ===== //
@@ -771,6 +844,8 @@
         xmlFiles = data.xmlFiles || [];
         pfps = data.pfps || [];
         videoTutorials = data.videoTutorials || [];
+        books = data.books || [];
+        apks = data.apks || [];
         renderAll();
       });
     }
@@ -793,7 +868,9 @@
           otherMethods,
           xmlFiles,
           pfps,
-          videoTutorials
+          videoTutorials,
+          books,
+          apks
         };
 
         return database.ref('siteData').update(updatedData);
@@ -847,7 +924,7 @@
       
       if (password === 'KING12FF') {
         isAdmin = true;
-        [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin, xmlAdmin, pfpAdmin, videoTutorialsAdmin]
+        [formsAdmin, methodsAdmin, cbMethodsAdmin, otherMethodsAdmin, xmlAdmin, pfpAdmin, videoTutorialsAdmin, booksAdmin, apksAdmin]
           .forEach(panel => panel.style.display = 'block');
         hideAdminModal();
         alert("Admin access granted!");
@@ -856,6 +933,32 @@
         adminPassword.value = '';
         adminPassword.focus();
       }
+    }
+
+    // ===== FILE UPLOAD HELPERS ===== //
+
+    function uploadFileToStorage(file, folderPath) {
+      return new Promise((resolve, reject) => {
+        if (!file) return reject(new Error('No file provided'));
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/\s+/g, '_');
+        const storageRef = storage.ref().child(`${folderPath}/${timestamp}_${safeName}`);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            // progress can be handled here if needed
+          }, 
+          (error) => {
+            reject(error);
+          }, 
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+              resolve(downloadURL);
+            }).catch(err => reject(err));
+          }
+        );
+      });
     }
 
     // ===== CORE FUNCTIONALITY ===== //
@@ -873,27 +976,80 @@
         'otherMethod': 'other-method',
         'xml': 'xml',
         'pfp': 'pfp',
-        'videoTutorial': 'video'
+        'videoTutorial': 'video',
+        'book': 'books',
+        'apk': 'apks'
       };
       
       const prefix = prefixMap[type];
-      const name = document.getElementById(`${prefix}-name`).value.trim();
-      const desc = document.getElementById(`${prefix}-desc`).value.trim();
-      const link = type === 'form' ? document.getElementById(`${prefix}-link`).value.trim() : 
-                   type === 'videoTutorial' ? document.getElementById(`${prefix}-link`).value.trim() : null;
-      const png = type === 'xml' ? document.getElementById(`${prefix}-png`).value.trim() : null;
-      const file = type === 'xml' ? document.getElementById(`${prefix}-file`).value.trim() : 
-                   type === 'pfp' ? document.getElementById(`${prefix}-file`).value.trim() : null;
+      const name = document.getElementById(`${prefix}-name`) ? document.getElementById(`${prefix}-name`).value.trim() : '';
+      const desc = document.getElementById(`${prefix}-desc`) ? document.getElementById(`${prefix}-desc`).value.trim() : '';
+      const link = (type === 'form') ? document.getElementById(`${prefix}-link`).value.trim() : 
+                   (type === 'videoTutorial') ? document.getElementById(`${prefix}-link`).value.trim() : null;
+      const png = (type === 'xml') ? document.getElementById(`${prefix}-png`).value.trim() : null;
+      const fileUrlField = null;
 
-      if (!name || !desc || 
-          (type === 'form' && !link) || 
-          (type === 'videoTutorial' && !link) || 
-          (type === 'xml' && (!png || !file)) || 
-          (type === 'pfp' && !file)) {
+      // Simple validation for fields that exist
+      if ((document.getElementById(`${prefix}-name`) && !name) || (document.getElementById(`${prefix}-desc`) && !desc)) {
+        alert("Please fill all fields");
+        return;
+      }
+      if ((type === 'form' && !link) || (type === 'videoTutorial' && !link) || (type === 'xml' && (!png || !document.getElementById(`${prefix}-file`).value.trim()))) {
         alert("Please fill all fields");
         return;
       }
 
+      // Books and APKs require file upload from phone storage
+      if (type === 'book' || type === 'apk') {
+        const fileInput = document.getElementById(`${prefix}-file-input`);
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+          alert("Please choose a file from your phone");
+          return;
+        }
+        const file = fileInput.files[0];
+        const folder = (type === 'book') ? 'uploads/books' : 'uploads/apks';
+
+        // Show a simple uploading message
+        const uploadingNote = document.createElement('div');
+        uploadingNote.style.position = 'fixed';
+        uploadingNote.style.top = '50%';
+        uploadingNote.style.left = '50%';
+        uploadingNote.style.transform = 'translate(-50%, -50%)';
+        uploadingNote.style.backgroundColor = '#333';
+        uploadingNote.style.color = 'white';
+        uploadingNote.style.padding = '15px';
+        uploadingNote.style.borderRadius = '8px';
+        uploadingNote.style.zIndex = '1100';
+        uploadingNote.textContent = 'Uploading file... please wait';
+        document.body.appendChild(uploadingNote);
+
+        uploadFileToStorage(file, folder)
+          .then(downloadURL => {
+            document.body.removeChild(uploadingNote);
+            const newItem = { name, description: desc, file: downloadURL, originalFileName: file.name };
+            if (type === 'book') {
+              books.push(newItem);
+            } else {
+              apks.push(newItem);
+            }
+            saveAll();
+            renderAll();
+            // clear inputs
+            document.getElementById(`${prefix}-name`).value = '';
+            document.getElementById(`${prefix}-desc`).value = '';
+            fileInput.value = '';
+            alert('File uploaded and item added successfully!');
+          })
+          .catch(err => {
+            document.body.removeChild(uploadingNote);
+            console.error('Upload error:', err);
+            alert('File upload failed: ' + err.message);
+          });
+
+        return; // exit function because upload is async
+      }
+
+      // Non-file items handled synchronously
       let newItem;
       switch(type) {
         case 'form':
@@ -913,11 +1069,13 @@
           otherMethods.push(newItem);
           break;
         case 'xml':
-          newItem = { name, description: desc, png, file };
+          const xmlFileUrl = document.getElementById(`${prefix}-file`).value.trim();
+          newItem = { name, description: desc, png, file: xmlFileUrl };
           xmlFiles.push(newItem);
           break;
         case 'pfp':
-          newItem = { name, description: desc, file };
+          const pfpFileUrl = document.getElementById(`${prefix}-file`).value.trim();
+          newItem = { name, description: desc, file: pfpFileUrl };
           pfps.push(newItem);
           break;
         case 'videoTutorial':
@@ -929,9 +1087,9 @@
       saveAll();
       renderAll();
       
-      // Clear form
-      document.getElementById(`${prefix}-name`).value = '';
-      document.getElementById(`${prefix}-desc`).value = '';
+      // Clear form fields
+      if (document.getElementById(`${prefix}-name`)) document.getElementById(`${prefix}-name`).value = '';
+      if (document.getElementById(`${prefix}-desc`)) document.getElementById(`${prefix}-desc`).value = '';
       if (type === 'form' || type === 'videoTutorial') document.getElementById(`${prefix}-link`).value = '';
       if (type === 'xml') {
         document.getElementById(`${prefix}-png`).value = '';
@@ -970,6 +1128,12 @@
         case 'videoTutorial':
           videoTutorials.splice(index, 1);
           break;
+        case 'book':
+          books.splice(index, 1);
+          break;
+        case 'apk':
+          apks.splice(index, 1);
+          break;
       }
 
       saveAll();
@@ -984,6 +1148,8 @@
       renderXmlFiles();
       renderPfps();
       renderVideoTutorials();
+      renderBooks();
+      renderApks();
     }
 
     function renderForms() {
@@ -1066,6 +1232,38 @@
             <a href="${video.link}" target="_blank" class="social-btn">
               <i class="fas fa-play"></i> Watch Tutorial
             </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBooks() {
+      booksContainer.innerHTML = books.map((book, index) => `
+        <div class="method-card">
+          <button class="delete-btn" onclick="deleteItem('book', ${index})"><i class="fas fa-trash"></i></button>
+          <h3>${book.name}</h3>
+          <p>${book.description}</p>
+          <div class="btn-container">
+            <a href="${book.file}" class="social-btn" download>
+              <i class="fas fa-download"></i> Download Book
+            </a>
+            ${book.originalFileName ? `<span style="align-self:center; margin-left:8px; font-size:12px;">${book.originalFileName}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderApks() {
+      apksContainer.innerHTML = apks.map((apk, index) => `
+        <div class="method-card">
+          <button class="delete-btn" onclick="deleteItem('apk', ${index})"><i class="fas fa-trash"></i></button>
+          <h3>${apk.name}</h3>
+          <p>${apk.description}</p>
+          <div class="btn-container">
+            <a href="${apk.file}" class="social-btn" download>
+              <i class="fas fa-download"></i> Download APK
+            </a>
+            ${apk.originalFileName ? `<span style="align-self:center; margin-left:8px; font-size:12px;">${apk.originalFileName}</span>` : ''}
           </div>
         </div>
       `).join('');
